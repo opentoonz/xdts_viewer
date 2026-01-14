@@ -45,10 +45,11 @@ SettingsDialog::SettingsDialog(QWidget* parent)
   m_exportAreaCombo         = new QComboBox(this);
   m_pageInfoLbl             = new QLabel(this);
   m_skippedLevelNamesEdit   = new QLineEdit(this);
-  m_expandColumnsCB   = new QCheckBox(tr("Adaptively Expand Columns "), this);
-  m_mixUpColumnsCombo = new QComboBox(this);
-  m_mixupKeyBtn       = new QPushButton(tr("Edit Mix-up Keys"), this);
-  m_withDenpyoCB      = new QCheckBox(tr("Attach Composite Voucher"), this);
+  m_expandColumnsGB = new QGroupBox(tr("Adaptively Expand Columns "), this);
+  m_cameraColumnAdditionEdit = new QLineEdit(this);
+  m_mixUpColumnsCombo        = new QComboBox(this);
+  m_mixupKeyBtn              = new QPushButton(tr("Edit Mix-up Keys"), this);
+  m_withDenpyoCB = new QCheckBox(tr("Attach Composite Voucher"), this);
   m_showSkippedDrawingsCB =
       new QCheckBox(tr("Show Skipped Drawings Information"), this);
   m_backsideImgPathField = new QLineEdit(this);
@@ -56,7 +57,6 @@ SettingsDialog::SettingsDialog(QWidget* parent)
       tr("Scanned Genga Sheet Mode ( Hide Genga && Camera Area Lines )"));
   m_gengaLevelsCountEdit = new QLineEdit(this);
   // m_dougaColumnOffsetEdit           = new QLineEdit(this);// deprecated
-  m_cameraColumnAdditionEdit        = new QLineEdit(this);
   m_scannedSheetPageAmountEdit      = new QLineEdit(this);
   QPushButton* backsideBrowseButton = new QPushButton("...", this);
   QPushButton* closeButton          = new QPushButton(tr("OK"), this);
@@ -77,6 +77,8 @@ SettingsDialog::SettingsDialog(QWidget* parent)
   backsideBrowseButton->setFocusPolicy(Qt::NoFocus);
   m_exportAreaCombo->addItem(tr("ACTIONS"), Area_Actions);
   m_exportAreaCombo->addItem(tr("CELLS"), Area_Cells);
+
+  m_expandColumnsGB->setCheckable(true);
 
   m_mixUpColumnsCombo->addItem(tr("Manually Specify Mix-up Keys"),
                                Mixup_Manual);
@@ -117,8 +119,20 @@ SettingsDialog::SettingsDialog(QWidget* parent)
       formatLay->addWidget(m_templateCombo, 0, 1, 1, 2,
                            Qt::AlignLeft | Qt::AlignVCenter);
 
-      formatLay->addWidget(m_expandColumnsCB, 1, 0, 1, 3,
-                           Qt::AlignLeft | Qt::AlignVCenter);
+      formatLay->addWidget(m_expandColumnsGB, 1, 0, 1, 3);
+      QGridLayout* expandColumnsLay = new QGridLayout();
+      expandColumnsLay->setMargin(5);
+      expandColumnsLay->setHorizontalSpacing(5);
+      expandColumnsLay->setVerticalSpacing(10);
+      {
+        expandColumnsLay->addWidget(
+            new QLabel(tr("Camera Column Addition:"), this), 1, 0,
+            Qt::AlignRight | Qt::AlignVCenter);
+        expandColumnsLay->addWidget(m_cameraColumnAdditionEdit, 1, 1,
+                                    Qt::AlignLeft | Qt::AlignVCenter);
+      }
+      expandColumnsLay->setColumnStretch(1, 1);
+      m_expandColumnsGB->setLayout(expandColumnsLay);
 
       formatLay->addWidget(new QLabel(tr("Mix-up Columns:"), this), 2, 0,
                            Qt::AlignRight | Qt::AlignVCenter);
@@ -177,12 +191,6 @@ SettingsDialog::SettingsDialog(QWidget* parent)
                                    Qt::AlignRight | Qt::AlignVCenter);
         scannedGengaLay->addWidget(m_scannedSheetPageAmountEdit, 0, 4,
                                    Qt::AlignLeft | Qt::AlignVCenter);
-
-        scannedGengaLay->addWidget(
-            new QLabel(tr("Camera Column Addition:"), this), 1, 0,
-            Qt::AlignRight | Qt::AlignVCenter);
-        scannedGengaLay->addWidget(m_cameraColumnAdditionEdit, 1, 1,
-                                   Qt::AlignLeft | Qt::AlignVCenter);
       }
       scannedGengaLay->setColumnStretch(1, 1);
       scannedGengaLay->setColumnStretch(4, 1);
@@ -225,8 +233,10 @@ SettingsDialog::SettingsDialog(QWidget* parent)
 
   connect(m_templateCombo, SIGNAL(activated(int)), this,
           SLOT(onTemplateSwitched(int)));
-  connect(m_expandColumnsCB, SIGNAL(clicked(bool)), this,
+  connect(m_expandColumnsGB, SIGNAL(clicked(bool)), this,
           SLOT(onExpandColumnsSwitched()));
+  connect(m_cameraColumnAdditionEdit, SIGNAL(editingFinished()), this,
+          SLOT(onCameraColumnAdditionEdited()));
   connect(m_mixUpColumnsCombo, SIGNAL(activated(int)), this,
           SLOT(onMixUpActivated()));
   connect(m_mixupKeyBtn, SIGNAL(clicked()), this, SLOT(openMixupKeyDialog()));
@@ -250,8 +260,6 @@ SettingsDialog::SettingsDialog(QWidget* parent)
           SLOT(onFormatSettingsChanged()));
   connect(m_gengaLevelsCountEdit, SIGNAL(editingFinished()), this,
           SLOT(onGengaLevelsCountEdited()));
-  connect(m_cameraColumnAdditionEdit, SIGNAL(editingFinished()), this,
-          SLOT(onCameraColumnAdditionEdited()));
   connect(m_scannedSheetPageAmountEdit, SIGNAL(editingFinished()), this,
           SLOT(onFormatSettingsChanged()));
 
@@ -270,7 +278,9 @@ SettingsDialog::SettingsDialog(QWidget* parent)
 void SettingsDialog::syncUIs() {
   MyParams* p = MyParams::instance();
   m_templateCombo->setCurrentText(p->templateName());
-  m_expandColumnsCB->setChecked(p->isExpandColumns());
+  m_expandColumnsGB->setChecked(p->isExpandColumns());
+  m_cameraColumnAdditionEdit->setText(
+      QString::number(p->cameraColumnAddition_Param()));
 
   m_mixUpColumnsCombo->setCurrentIndex(
       m_mixUpColumnsCombo->findData(p->mixUpColumnsType()));
@@ -290,8 +300,6 @@ void SettingsDialog::syncUIs() {
   // m_dougaColumnOffsetEdit->setText(
   //     QString::number(p->dougaColumnOffset_Param()));
 
-  m_cameraColumnAdditionEdit->setText(
-      QString::number(p->cameraColumnAddition_Param()));
   m_scannedSheetPageAmountEdit->setText(
       QString::number(p->scannedSheetPageAmount_Param()));
 
@@ -311,7 +319,7 @@ void SettingsDialog::onTemplateSwitched(int) {
 }
 
 void SettingsDialog::onExpandColumnsSwitched() {
-  MyParams::instance()->setIsExpamdColumns(m_expandColumnsCB->isChecked());
+  MyParams::instance()->setIsExpamdColumns(m_expandColumnsGB->isChecked());
   MyParams::instance()->notifyTemplateSwitched();
   MyParams::instance()->setFormatDirty(true);
 }

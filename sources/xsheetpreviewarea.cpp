@@ -834,6 +834,11 @@ void XSheetPDFTemplate::drawCameraBlock(QPainter& painter, const int bodyId) {
   font.setPixelSize(m_p.bodylabelTextSize_Large);
   painter.setFont(font);
 
+  int totalCameraColmnAount =
+      param(CameraColAmount) + MyParams::instance()->getCameraColumnAddition();
+  int totalCameraBlockWidth =
+      m_p.cameraBlockWidth + m_p.cameraColumnAdditionWidth;
+
   painter.save();
   {
     // Camera Block header
@@ -843,24 +848,24 @@ void XSheetPDFTemplate::drawCameraBlock(QPainter& painter, const int bodyId) {
                                 ? QObject::tr("CAMERA", "XSheetPDF")
                                 : "CAMERA";
       if (param(DrawCameraHeaderGrid, 0) == 1) {
-        drawHeaderGrid(painter, param(CameraColAmount), param(CameraColWidth),
-                       m_p.cameraBlockWidth);
+        drawHeaderGrid(painter, totalCameraColmnAount, param(CameraColWidth),
+                       totalCameraBlockWidth);
         if (param(DrawCameraHeaderLabel, 1) == 1) {
           font.setPixelSize(m_p.bodylabelTextSize_Small);
           painter.setFont(font);
-          QRect labelRect(0, 0, m_p.cameraBlockWidth, param(HeaderHeight) / 2);
+          QRect labelRect(0, 0, totalCameraBlockWidth, param(HeaderHeight) / 2);
           doDrawText(painter, cameraLabel, labelRect);
         }
       } else {
         // horizontal lines
         painter.setPen(thickPen);
-        painter.drawLine(0, param(HeaderHeight), m_p.cameraBlockWidth,
+        painter.drawLine(0, param(HeaderHeight), totalCameraBlockWidth,
                          param(HeaderHeight));
 
         if (param(DrawCameraHeaderLabel, 1) == 1) {
           font.setPixelSize(m_p.bodylabelTextSize_Large);
           painter.setFont(font);
-          QRect labelRect(0, 0, m_p.cameraBlockWidth, param(HeaderHeight));
+          QRect labelRect(0, 0, totalCameraBlockWidth, param(HeaderHeight));
           doDrawText(painter, cameraLabel, labelRect);
         }
       }
@@ -872,8 +877,8 @@ void XSheetPDFTemplate::drawCameraBlock(QPainter& painter, const int bodyId) {
       {
         painter.translate(0, param(HeaderHeight));
         // Cells Block
-        drawGrid(painter, param(CameraColAmount) - 1, param(CameraColWidth),
-                 m_p.cameraBlockWidth);
+        drawGrid(painter, totalCameraColmnAount - 1, param(CameraColWidth),
+                 totalCameraBlockWidth);
       }
       painter.restore();
     }
@@ -883,7 +888,7 @@ void XSheetPDFTemplate::drawCameraBlock(QPainter& painter, const int bodyId) {
         m_info.endOverlapFrameLength > 0) {
       painter.save();
       painter.translate(0, param(HeaderHeight));
-      registerCameraRects(painter, param(CameraColAmount),
+      registerCameraRects(painter, totalCameraColmnAount,
                           param(CameraColWidth));
       painter.restore();
     }
@@ -918,7 +923,6 @@ void XSheetPDFTemplate::drawXsheetBody(QPainter& painter, int framePage,
     drawCameraBlock(painter, bodyId);
     if (MyParams::instance()->isScannedGengaSheet()) {
       setPenVisible(true);
-      painter.translate(m_p.cameraColumnAdditionWidth, 0);
     }
   }
   painter.restore();

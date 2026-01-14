@@ -17,7 +17,8 @@ class SettingsDialog : public QDialog {
   Q_OBJECT
   // format
   QComboBox* m_templateCombo;
-  QCheckBox* m_expandColumnsCB;
+  QGroupBox* m_expandColumnsGB;
+  QLineEdit* m_cameraColumnAdditionEdit;
   QComboBox* m_mixUpColumnsCombo;
   QPushButton* m_mixupKeyBtn;
   QLineEdit* m_logoImgPathField;
@@ -29,7 +30,6 @@ class SettingsDialog : public QDialog {
   QGroupBox* m_scannedGengaSheetGB;
   QLineEdit* m_gengaLevelsCountEdit;
   // QLineEdit* m_dougaColumnOffsetEdit; // deprecated
-  QLineEdit* m_cameraColumnAdditionEdit;
   QLineEdit* m_scannedSheetPageAmountEdit;
   QLabel* m_pageInfoLbl;
 
