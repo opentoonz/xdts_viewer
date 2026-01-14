@@ -865,6 +865,7 @@ void MyWindow::onLoad(const QString& xdtsPath) {
   m_previewPane->setScribbleImage(QImage());
 
   m_columns.clear();
+  m_durations.clear();
 
   QList<ExportArea> areaIds = MyParams::instance()->exposeAreas();
   for (auto areaId : areaIds) {
