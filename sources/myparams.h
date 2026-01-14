@@ -63,6 +63,7 @@ class MyParams : public QObject  // singleton
   // Ex:  "*_e;*_k;*_s;lo"
   QString m_skippedLevelNames;
   bool m_expandColumns;
+  int m_cameraColumnAddition;  // カメラ列の追加分（列を拡張する場合）
 
   MixupColumnsType m_mixUpColumnsType;
 
@@ -88,7 +89,6 @@ class MyParams : public QObject  // singleton
                             // 動画列の開始位置（原画シートが紙スキャンの場合）
   int m_gengaLevelsCount;   // 原画のセル数
 
-  int m_cameraColumnAddition;  // カメラ列の追加分（原画シートが紙スキャンの場合）
   int m_scannedSheetPageAmount;  // 手動で空ページを追加する
 
   // OL尺（フレーム長で保存する）
@@ -229,7 +229,7 @@ public:
   void setCameraColumnAddition(int val) { m_cameraColumnAddition = val; }
   int cameraColumnAddition_Param() { return m_cameraColumnAddition; }
   int getCameraColumnAddition() {
-    return (m_isScannedGengaSheet) ? m_cameraColumnAddition : 0;
+    return (m_expandColumns) ? m_cameraColumnAddition : 0;
   }
 
   void setScannedSheetPageAmount(int val) { m_scannedSheetPageAmount = val; }
