@@ -1351,6 +1351,9 @@ int XSheetPDFTemplate::param(const std::string& id, int defaultValue) {
     // 表示エリアを拡張する。原画動画ペアの場合は、一方しかデータが無くても両方拡張する。
     if (id == KeyColAmount && (m_info.exportAreas.contains(Area_Actions) ||
                                MyParams::instance()->isAreaSpecified())) {
+      // 紙原画の場合は拡張しない（原画欄でなく、動画欄に空欄を増やす）
+      if (MyParams::instance()->isScannedGengaSheet())
+        return m_params.value(id, defaultValue);
       return std::max(colsInScene, m_params.value(id, defaultValue));
     } else if (id == CellsColAmount) {
       // 紙原画のスキャンを持ち込んでいるとき、Cell欄がAction欄と同じ列数になるように拡張する
@@ -1369,8 +1372,9 @@ int XSheetPDFTemplate::param(const std::string& id, int defaultValue) {
     } else if (id == BodyWidth) {
       int width = m_params.value(BodyWidth, defaultValue);
       // Actions area
-      if (m_info.exportAreas.contains(Area_Actions) ||
-          MyParams::instance()->isAreaSpecified()) {
+      if (!MyParams::instance()->isScannedGengaSheet() &&
+          (m_info.exportAreas.contains(Area_Actions) ||
+           MyParams::instance()->isAreaSpecified())) {
         int exColAmount = colsInScene - m_params.value(KeyColAmount);
         if (exColAmount > 0) width += exColAmount * param(KeyColWidth);
       }
