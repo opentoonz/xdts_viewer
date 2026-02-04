@@ -38,9 +38,15 @@ void AETool::onPress(const QPointF& pos, Qt::KeyboardModifiers modifiers) {
   int startColId = colsInPage * pPage;
   int colId      = m_currentColumnId + startColId;
 
-  if (colId >= columns.value(Area_Cells).size()) return;
+  ExportArea area =
+      columns.keys().contains(Area_Cells) ? Area_Cells : Area_Unspecified;
+  if (area == Area_Unspecified &&
+      MyParams::instance()->exportArea() == Area_Actions)
+    return;
 
-  ColumnData columnData = columns.value(Area_Cells).at(colId);
+  if (colId >= columns.value(area).size()) return;
+
+  ColumnData columnData = columns.value(area).at(colId);
 
   // std::cout << "Level name = " << columnData.name.toStdString() << std::endl;
 
