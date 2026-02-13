@@ -103,7 +103,10 @@ protected:
 public:
   SelectionDragTool(QRect rect) : m_rect(rect) {}
   virtual void onClick(QPoint p) {};
-  virtual QRect onDrag(QPoint p, QRect) { return QRect(); };
+  virtual QRect onDrag(QPoint p, QRect r,
+                       const Qt::KeyboardModifiers modifiers) {
+    return QRect();
+  };
   virtual void onRelease() {};
 };
 
