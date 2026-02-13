@@ -231,7 +231,18 @@ class SelectionDragTranslate : public SelectionDragTool {
 public:
   SelectionDragTranslate(QRect rect) : SelectionDragTool(rect) {}
   void onClick(QPoint p) override { m_pos = p; }
-  QRect onDrag(QPoint p, QRect r) override { return r.translated(p - m_pos); }
+  QRect onDrag(QPoint p, QRect r,
+               const Qt::KeyboardModifiers modifiers) override {
+    if (modifiers & Qt::ShiftModifier) {
+      // 移動量の大きい方にスナップ
+      QPoint dif = p - m_pos;
+      if (std::abs(dif.x()) > std::abs(dif.y()))
+        p.setY(m_pos.y());
+      else
+        p.setX(m_pos.x());
+    }
+    return r.translated(p - m_pos);
+  }
   void onRelease() override {}
 };
 
@@ -244,7 +255,8 @@ public:
       , m_pivotPos(pivotPos)
       , m_handleOffset(handlePos) {}
   void onClick(QPoint p) override { m_handleOffset = p - m_handleOffset; }
-  QRect onDrag(QPoint p, QRect r) override {
+  QRect onDrag(QPoint p, QRect r,
+               const Qt::KeyboardModifiers modifiers) override {
     return QRect(p - m_handleOffset, m_pivotPos).normalized();
   }
   void onRelease() override {}
@@ -334,7 +346,7 @@ void SelectionTool::onDrag(const QPointF& from, const QPointF& to,
     }
     // std::cout << "move to "<<p.x()<<", " << p.y() << std::endl;
   } else if (m_dragTool) {
-    m_currentRect = m_dragTool->onDrag(p, m_selectedRect);
+    m_currentRect = m_dragTool->onDrag(p, m_selectedRect, modifiers);
   }
 }
 
